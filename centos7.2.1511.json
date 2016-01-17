@@ -1,0 +1,59 @@
+{
+  "builders": [
+    {
+      "type": "virtualbox-iso",
+      "vm_name": "CentOS-7.2.1511-x86_64",
+      "boot_wait": "10s",
+      "disk_size": 10240,
+      "guest_os_type": "RedHat_64",
+      "http_directory": "http",
+
+      "iso_checksum": "88c0437f0a14c6e2c94426df9d43cd67",
+      "iso_checksum_type": "md5",
+      "iso_url": "http://ftp.iij.ad.jp/pub/linux/centos/7.2.1511/isos/x86_64/CentOS-7-x86_64-Minimal-1511.iso",
+      "guest_additions_path": "VBoxGuestAdditions.iso",
+
+      "boot_command": [
+        "<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ks-centos7.2.1511.cfg<enter><wait>"
+      ],
+      "shutdown_command": "echo 'vagrant' | sudo -S /sbin/halt -h -p",
+      "shutdown_timeout": "10s",
+      "ssh_username": "vagrant",
+      "ssh_password": "vagrant",
+      "ssh_port": 22,
+      "hard_drive_interface": "sata",
+      "ssh_wait_timeout": "60m",
+      "output_directory": "builds",
+      "vboxmanage": [
+        ["modifyvm","{{.Name}}","--memory","1024"],
+        ["modifyvm","{{.Name}}","--cpus","2"]
+      ],
+      "virtualbox_version_file": ".vbox_version"
+    }
+  ],
+
+  "post-processors": [
+    {
+      "output": "vagrant-centos-7.2.1511-x86_64.box",
+      "compression_level": "6",
+      "type": "vagrant"
+    }
+  ],
+
+  "provisioners": [
+    {
+      "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
+      "type": "shell",
+      "override": {
+        "virtualbox-iso": {
+          "scripts": [
+            "scripts/base.sh",
+            "scripts/vagrant.sh",
+            "scripts/virtualbox.sh",
+            "scripts/cleanup.sh"
+          ]
+        }
+      }
+    }
+  ]
+}
